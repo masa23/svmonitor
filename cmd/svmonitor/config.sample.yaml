@@ -1,0 +1,6 @@
+Graphite:
+  Prefix: "sec.svmonitor.local"
+  Host: "graphite.example.jp"
+  Port: 2003
+  SendBuffer: 1000
+ReportInterval: "1s"

@@ -1,2 +1,2 @@
-./cmd/svmonitor/svmonitor
-./cmd/svmonitor/config.yaml
+cmd/svmonitor/svmonitor
+cmd/svmonitor/config.yaml
