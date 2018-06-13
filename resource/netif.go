@@ -17,6 +17,7 @@ func NetIfCount() (map[string]map[string]map[string]int64, error) {
 	if err != nil {
 		return netifStats, err
 	}
+	defer fd.Close()
 
 	scanner := bufio.NewScanner(fd)
 
@@ -58,6 +59,13 @@ func NetIfCount() (map[string]map[string]map[string]int64, error) {
 		netifStats[iface]["rx"] = make(map[string]int64)
 		netifStats[iface]["tx"] = make(map[string]int64)
 		for _, item := range netifItems {
+			// reset counter old stat set 0
+			if stats[iface]["rx"][item] < stat["rx"][item] {
+				stat["rx"][item] = 0
+			}
+			if stats[iface]["tx"][item] < stat["tx"][item] {
+				stat["tx"][item] = 0
+			}
 			netifStats[iface]["rx"][item] = stats[iface]["rx"][item] - stat["rx"][item]
 			netifStats[iface]["tx"][item] = stats[iface]["tx"][item] - stat["tx"][item]
 		}

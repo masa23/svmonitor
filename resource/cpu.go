@@ -18,7 +18,7 @@ func CPU() (map[string]map[string]int64, error) {
 	if err != nil {
 		return cpuUse, err
 	}
-
+	defer fd.Close()
 	scanner := bufio.NewScanner(fd)
 
 	for scanner.Scan() {
