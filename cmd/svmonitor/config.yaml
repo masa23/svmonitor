@@ -1,6 +1,0 @@
-Graphite:
-  Prefix: "sec.svmonitor.local"
-  Host: "c1.lxd.masa23.jp"
-  Port: 2003
-  SendBuffer: 1000
-ReportInterval: "1s"

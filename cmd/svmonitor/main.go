@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/k0kubun/pp"
 	graphite "github.com/marpaia/graphite-golang"
 	"github.com/masa23/svmonitor"
 	"github.com/masa23/svmonitor/resource"
@@ -26,28 +25,7 @@ func main() {
 	}
 
 	sendChan := make(chan []graphite.Metric, conf.Graphite.SendBuffer)
-	g, err := graphite.NewGraphite(conf.Graphite.Host, conf.Graphite.Port)
-	if err != nil {
-		panic(err)
-	}
-	defer g.Disconnect()
-	go func() {
-		for {
-			metrics := <-sendChan
-			for {
-				pp.Println(metrics)
-				err = g.SendMetrics(metrics)
-				if err != nil {
-					g.Disconnect()
-					pp.Println(err)
-					g, err = graphite.NewGraphite(conf.Graphite.Host, conf.Graphite.Port)
-					time.Sleep(time.Millisecond * 100)
-				}
-				break
-			}
-		}
-	}()
-
+	go graphiteSendMetrics(sendChan)
 	timer := time.NewTimer(0)
 	defer timer.Stop()
 	for {
@@ -58,7 +36,7 @@ func main() {
 		timer.Reset(d)
 		t := <-timer.C
 
-		metrics, err := sendGraphiteMetrics(t)
+		metrics, err := createGraphiteMetrics(t)
 		if err != nil {
 			panic(err)
 		}
@@ -67,7 +45,33 @@ func main() {
 	}
 }
 
-func sendGraphiteMetrics(t time.Time) ([]graphite.Metric, error) {
+func graphiteSendMetrics(sendChan chan []graphite.Metric) {
+	g, err := graphite.NewGraphite(conf.Graphite.Host, conf.Graphite.Port)
+	if err != nil {
+		panic(err)
+	}
+	defer g.Disconnect()
+	for {
+		metrics := <-sendChan
+		for {
+			err = g.SendMetrics(metrics)
+			if err != nil {
+				for {
+					g.Disconnect()
+					g, err = graphite.NewGraphite(conf.Graphite.Host, conf.Graphite.Port)
+					if err != nil {
+						time.Sleep(time.Second)
+						continue
+					}
+					break
+				}
+			}
+			break
+		}
+	}
+}
+
+func createGraphiteMetrics(t time.Time) ([]graphite.Metric, error) {
 	var metrics []graphite.Metric
 	cpus, err := resource.CPU()
 	if err != nil {
