@@ -11,7 +11,7 @@ var cpuStatsOld map[string]map[string]int64
 var cpuItems = []string{"user", "nice", "system", "idle", "hwirq", "swirq", "steal"}
 
 // CPU is cpu use resource parcents
-func CPU() (map[string]map[string]int64, error) {
+func CPUStat() (map[string]map[string]int64, error) {
 	cpuStats := make(map[string]map[string]int64)
 	cpuUse := make(map[string]map[string]int64)
 	fd, err := os.Open("/proc/stat")

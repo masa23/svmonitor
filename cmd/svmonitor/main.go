@@ -74,7 +74,7 @@ func createGraphiteMetrics(t time.Time) ([]graphite.Metric, error) {
 	var metrics []graphite.Metric
 
 	if conf.Metric.CPU.Enable {
-		cpus, err := resource.CPU()
+		cpus, err := resource.CPUStat()
 		if err != nil {
 			return metrics, err
 		}
@@ -101,7 +101,7 @@ func createGraphiteMetrics(t time.Time) ([]graphite.Metric, error) {
 	}
 
 	if conf.Metric.Network.Enable {
-		netif, err := resource.NetIfCount()
+		netif, err := resource.NetIfStat()
 		if err != nil {
 			return metrics, err
 		}

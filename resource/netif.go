@@ -10,7 +10,7 @@ import (
 var netifStatsOld map[string]map[string]map[string]int64
 var netifItems = []string{"bytes", "packets", "errs", "drop", "fifo", "compressed", "multicast"}
 
-func NetIfCount() (map[string]map[string]map[string]int64, error) {
+func NetIfStat() (map[string]map[string]map[string]int64, error) {
 	stats := make(map[string]map[string]map[string]int64)
 	netifStats := make(map[string]map[string]map[string]int64)
 	fd, err := os.Open("/proc/net/dev")
@@ -23,12 +23,11 @@ func NetIfCount() (map[string]map[string]map[string]int64, error) {
 
 	for scanner.Scan() {
 		l := scanner.Text()
-		s := strings.Fields(l)
-
+		s := strings.Fields(strings.Replace(l, ":", " ", -1))
 		if len(s) < 17 {
 			continue
 		}
-		ifname := strings.TrimRight(s[0], ":")
+		ifname := s[0]
 
 		stat := make(map[string]map[string]int64)
 		stat["rx"] = make(map[string]int64)
