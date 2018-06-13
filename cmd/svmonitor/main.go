@@ -23,7 +23,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 	sendChan := make(chan []graphite.Metric, conf.Graphite.SendBuffer)
 	go graphiteSendMetrics(sendChan)
 	timer := time.NewTimer(0)
@@ -73,35 +72,62 @@ func graphiteSendMetrics(sendChan chan []graphite.Metric) {
 
 func createGraphiteMetrics(t time.Time) ([]graphite.Metric, error) {
 	var metrics []graphite.Metric
-	cpus, err := resource.CPU()
-	if err != nil {
-		return metrics, err
-	}
-	netif, err := resource.NetIfCount()
-	if err != nil {
-		return metrics, err
-	}
 
-	for cpu, stat := range cpus {
-		for item, value := range stat {
-			metrics = append(metrics, graphite.Metric{
-				Name:      fmt.Sprintf("%s.%s.%s.%s", conf.Graphite.Prefix, "cpu", cpu, item),
-				Value:     strconv.FormatInt(value, 10),
-				Timestamp: t.Unix(),
-			})
+	if conf.Metric.CPU.Enable {
+		cpus, err := resource.CPU()
+		if err != nil {
+			return metrics, err
 		}
-	}
 
-	for iface, ifstat := range netif {
-		for rxtx, stat := range ifstat {
-			for item, value := range stat {
+		if conf.Metric.CPU.AllCores {
+			for cpu, stat := range cpus {
+				for item, value := range stat {
+					metrics = append(metrics, graphite.Metric{
+						Name:      fmt.Sprintf("%s.%s.%s.%s", conf.Graphite.Prefix, "cpu", cpu, item),
+						Value:     strconv.FormatInt(value, 10),
+						Timestamp: t.Unix(),
+					})
+				}
+			}
+		} else {
+			for item, value := range cpus["cpu"] {
 				metrics = append(metrics, graphite.Metric{
-					Name:      fmt.Sprintf("%s.%s.%s.%s.%s", conf.Graphite.Prefix, "netif", iface, rxtx, item),
+					Name:      fmt.Sprintf("%s.%s.%s.%s", conf.Graphite.Prefix, "cpu", "cpu", item),
 					Value:     strconv.FormatInt(value, 10),
 					Timestamp: t.Unix(),
 				})
 			}
 		}
 	}
+
+	if conf.Metric.Network.Enable {
+		netif, err := resource.NetIfCount()
+		if err != nil {
+			return metrics, err
+		}
+		for iface, ifstat := range netif {
+			if !inArrayString(iface, conf.Metric.Network.Interfaces) {
+				continue
+			}
+			for rxtx, stat := range ifstat {
+				for item, value := range stat {
+					metrics = append(metrics, graphite.Metric{
+						Name:      fmt.Sprintf("%s.%s.%s.%s.%s", conf.Graphite.Prefix, "netif", iface, rxtx, item),
+						Value:     strconv.FormatInt(value, 10),
+						Timestamp: t.Unix(),
+					})
+				}
+			}
+		}
+	}
 	return metrics, nil
+}
+
+func inArrayString(str string, list []string) bool {
+	for _, v := range list {
+		if v == str {
+			return true
+		}
+	}
+	return false
 }

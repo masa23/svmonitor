@@ -4,3 +4,12 @@ Graphite:
   Port: 2003
   SendBuffer: 1000
 ReportInterval: "1s"
+Metric:
+  CPU:
+    Enable: true
+    AllCores: true
+  Network:
+    Enable: true
+    Interfaces:
+      - eth0
+      - lo

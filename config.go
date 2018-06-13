@@ -11,6 +11,7 @@ import (
 type Config struct {
 	Graphite       configGraphite `yaml:"Graphite"`
 	ReportInterval time.Duration  `yaml:"ReportInterval"`
+	Metric         configMetric   `yaml:"Metric"`
 }
 
 type configGraphite struct {
@@ -18,6 +19,21 @@ type configGraphite struct {
 	Host       string `yaml:"Host"`
 	Port       int    `yaml:"Port"`
 	SendBuffer int    `yaml:"SendBuffer"`
+}
+
+type configMetric struct {
+	CPU     configCPU     `yaml:"CPU"`
+	Network configNetwork `yaml:"Network"`
+}
+
+type configCPU struct {
+	Enable   bool `yaml:"Enable"`
+	AllCores bool `yaml:"AllCores"`
+}
+
+type configNetwork struct {
+	Enable     bool     `yaml:"Enable"`
+	Interfaces []string `yaml:"Interfaces"`
 }
 
 func ConfigLoad(configFile string) (Config, error) {
