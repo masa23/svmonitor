@@ -77,6 +77,10 @@ func createGraphiteMetrics(t time.Time) ([]graphite.Metric, error) {
 	if err != nil {
 		return metrics, err
 	}
+	netif, err := resource.NetIfCount()
+	if err != nil {
+		return metrics, err
+	}
 
 	for cpu, stat := range cpus {
 		for item, value := range stat {
@@ -85,6 +89,18 @@ func createGraphiteMetrics(t time.Time) ([]graphite.Metric, error) {
 				Value:     strconv.FormatInt(value, 10),
 				Timestamp: t.Unix(),
 			})
+		}
+	}
+
+	for iface, ifstat := range netif {
+		for rxtx, stat := range ifstat {
+			for item, value := range stat {
+				metrics = append(metrics, graphite.Metric{
+					Name:      fmt.Sprintf("%s.%s.%s.%s.%s", conf.Graphite.Prefix, "netif", iface, rxtx, item),
+					Value:     strconv.FormatInt(value, 10),
+					Timestamp: t.Unix(),
+				})
+			}
 		}
 	}
 	return metrics, nil
