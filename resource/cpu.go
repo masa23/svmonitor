@@ -58,8 +58,8 @@ func CPUStat() (map[string]map[string]int64, error) {
 				all2 += cpuUse[cpu][item]
 			}
 		}
-		// 端数はuserに入れ込んでしまう
-		cpuUse[cpu]["user"] += (100 - all2)
+		// 端数はidleに入れ込んでしまう
+		cpuUse[cpu]["idle"] += (100 - all2)
 	}
 	return cpuUse, nil
 }
