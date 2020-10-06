@@ -120,6 +120,27 @@ func createGraphiteMetrics(t time.Time) ([]graphite.Metric, error) {
 			}
 		}
 	}
+
+	if conf.Metric.AristaIf.Enable {
+		netif, err := resource.AristaIfStat()
+		if err != nil {
+			return metrics, err
+		}
+		for iface, ifstat := range netif {
+			if !inArrayString(iface, conf.Metric.AristaIf.Interfaces) {
+				continue
+			}
+			for rxtx, stat := range ifstat {
+				for item, value := range stat {
+					metrics = append(metrics, graphite.Metric{
+						Name:      fmt.Sprintf("%s.%s.%s.%s.%s", conf.Graphite.Prefix, "aristaif", iface, rxtx, item),
+						Value:     strconv.FormatFloat(value, 'f', -1, 64),
+						Timestamp: t.Unix(),
+					})
+				}
+			}
+		}
+	}
 	return metrics, nil
 }
 

@@ -13,3 +13,7 @@ Metric:
     Interfaces:
       - eth0
       - lo
+  AristaIf:
+    Enable: true
+    Interfaces:
+      - Ethernet1

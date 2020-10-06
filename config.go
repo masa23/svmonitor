@@ -22,8 +22,9 @@ type configGraphite struct {
 }
 
 type configMetric struct {
-	CPU     configCPU     `yaml:"CPU"`
-	Network configNetwork `yaml:"Network"`
+	CPU      configCPU     `yaml:"CPU"`
+	Network  configNetwork `yaml:"Network"`
+	AristaIf configNetwork `yaml:"AristaIf"`
 }
 
 type configCPU struct {
